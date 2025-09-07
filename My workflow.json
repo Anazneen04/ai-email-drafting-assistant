@@ -1,0 +1,174 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "documentId": {
+          "__rl": true,
+          "value": "1ac0YUUrHNncOREV8S-xypOYHq6MXc50pUa4uxrHK_ac",
+          "mode": "list",
+          "cachedResultName": "AI Email Draft Request (Responses)",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ac0YUUrHNncOREV8S-xypOYHq6MXc50pUa4uxrHK_ac/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 2133340342,
+          "mode": "list",
+          "cachedResultName": "Form Responses 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ac0YUUrHNncOREV8S-xypOYHq6MXc50pUa4uxrHK_ac/edit#gid=2133340342"
+        },
+        "event": "rowAdded",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "10fc6436-98eb-4574-ab7d-5b91361d8c17",
+      "name": "Google Sheets Trigger",
+      "credentials": {
+        "googleSheetsTriggerOAuth2Api": {
+          "id": "wTwELDFCPTc7xHPh",
+          "name": "Google Sheets Trigger account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=ou are a helpful assistant that writes professional email drafts. Generate a clear and concise email based on the following details. Also, create an appropriate subject line.\n\n**Subject:** [Generate a subject line here]\n\n---\n\n**Email Body:**\n\nHi {{ $('Google Sheets Trigger').item.json[\"Recipient Name\"] }},\n\n[Write the body of the email here based on the instructions below]\n\nThanks,\n{{ $('Google Sheets Trigger').item.json[\"Your Name/Sender\"] }}\n\n---\n**Drafting Instructions:**\n- **Tone:** {{ $('Google Sheets Trigger').item.json[\"Tone of Voice\"] }}\n- **Key Message:** {{ $('Google Sheets Trigger').item.json[\"Key Message\"] }}\n- **Context:** {{ $('Google Sheets Trigger').item.json[\"Important Context\"] }}\n- **Call to Action:** {{ $('Google Sheets Trigger').item.json[\"Call to Action\"] }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        208,
+        0
+      ],
+      "id": "745d2951-3e0e-4c2e-a56c-cbfe59cbf3e7",
+      "name": "Message a model",
+      "credentials": {
+        "openAiApi": {
+          "id": "n9nEP4rmXtuHadES",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "folderId": "default",
+        "title": "=Email Draft for {{ $('Google Sheets Trigger').item.json[\"Recipient Name\"] }} - {{ $now.toFormat('yyyy-MM-dd') }}"
+      },
+      "type": "n8n-nodes-base.googleDocs",
+      "typeVersion": 2,
+      "position": [
+        560,
+        0
+      ],
+      "id": "63edcf71-4022-4fd5-bc0a-37c97003789e",
+      "name": "Create a document",
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "HKFHqb1cznsQWmCq",
+          "name": "Google Docs account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentURL": "={{ $('Create a document').item.json.id }}",
+        "actionsUi": {
+          "actionFields": [
+            {
+              "action": "insert",
+              "locationChoice": "location",
+              "text": "={{ $('Message a model').item.json.message.content }}\n"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.googleDocs",
+      "typeVersion": 2,
+      "position": [
+        768,
+        0
+      ],
+      "id": "f5ea104f-9eeb-4af0-89a0-89a6f096e61a",
+      "name": "Update a document",
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "HKFHqb1cznsQWmCq",
+          "name": "Google Docs account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Google Sheets Trigger": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Create a document",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a document": {
+      "main": [
+        [
+          {
+            "node": "Update a document",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "17cc682b-22f3-48de-8fe0-51c321b53138",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "7bb7930f2a56635e3079c51a1c1e9620edc36eeede45814fa7fcf63b391fbeeb"
+  },
+  "id": "lKah3a3iNTkh14KY",
+  "tags": []
+}
